@@ -1,0 +1,205 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Стан гри XO Marker",
+  "description": "Стан гри в хрестики-нулики: ігрове поле, гравці з їхніми ходами та результат гри",
+  "type": "object",
+  "properties": {
+    "turn_mark_symbol": {
+      "description": "Позначка гравця, чия черга ходу",
+      "type": "string",
+      "pattern": "^[XO]$"
+    },
+    "board": {
+      "description": "Ігрове поле розміром 3 на 3",
+      "type": "object",
+      "properties": {
+        "cells": {
+          "description": "Клітинки ігрового поля",
+          "type": "array",
+          "minItems": 9,
+          "maxItems": 9,
+          "uniqueItems": true,
+          "items": {
+            "description": "Клітинка ігрового поля",
+            "type": "object",
+            "properties": {
+              "row_num": {
+                "description": "Номер рядка ігрового поля",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 3
+              },
+              "column_num": {
+                "description": "Номер стовпця ігрового поля",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 3
+              },
+              "mark_symbol": {
+                "description": "Позначка в клітинці, відсутня у вільної клітинки",
+                "type": "string",
+                "pattern": "^[XO]$"
+              }
+            },
+            "required": ["row_num", "column_num"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["cells"],
+      "additionalProperties": false
+    },
+    "players": {
+      "description": "Гравці гри",
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": {
+        "description": "Гравець",
+        "type": "object",
+        "properties": {
+          "mark_symbol": {
+            "description": "Позначка, закріплена за гравцем",
+            "type": "string",
+            "pattern": "^[XO]$"
+          },
+          "moves": {
+            "description": "Ходи, які виконав гравець",
+            "type": "array",
+            "items": {
+              "description": "Хід гравця",
+              "type": "object",
+              "properties": {
+                "selected_cell": {
+                  "description": "Клітинка, обрана для ходу",
+                  "type": "object",
+                  "properties": {
+                    "row_num": {
+                      "description": "Номер рядка обраної клітинки",
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 3
+                    },
+                    "column_num": {
+                      "description": "Номер стовпця обраної клітинки",
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 3
+                    }
+                  },
+                  "required": ["row_num", "column_num"],
+                  "additionalProperties": false
+                },
+                "check_result": {
+                  "description": "Результат перевірки ходу",
+                  "type": "object",
+                  "properties": {
+                    "correct_status": {
+                      "description": "Ознака того, що хід є коректним",
+                      "type": "boolean"
+                    },
+                    "rejection_reason": {
+                      "description": "Причина відхилення ходу, задається лише для некоректного ходу",
+                      "type": "string",
+                      "pattern": "^(клітинка зайнята|не черга гравця)$"
+                    }
+                  },
+                  "required": ["correct_status"],
+                  "if": {
+                    "properties": { "correct_status": { "const": false } }
+                  },
+                  "then": {
+                    "required": ["rejection_reason"]
+                  },
+                  "else": {
+                    "not": { "required": ["rejection_reason"] }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "required": ["selected_cell", "check_result"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["mark_symbol", "moves"],
+        "additionalProperties": false
+      }
+    },
+    "result": {
+      "description": "Результат гри, задається після завершення гри",
+      "type": "object",
+      "properties": {
+        "result_type": {
+          "description": "Вид завершення гри",
+          "type": "string",
+          "pattern": "^(переможець|нічия)$"
+        },
+        "winner_mark_symbol": {
+          "description": "Позначка переможця",
+          "type": "string",
+          "pattern": "^[XO]$"
+        },
+        "winning_combination": {
+          "description": "Виграшна комбінація",
+          "type": "object",
+          "properties": {
+            "line_type": {
+              "description": "Розташування трьох однакових позначок",
+              "type": "string",
+              "pattern": "^(рядок|стовпець|діагональ)$"
+            },
+            "cells": {
+              "description": "Клітинки виграшної комбінації",
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "description": "Клітинка виграшної комбінації",
+                "type": "object",
+                "properties": {
+                  "row_num": {
+                    "description": "Номер рядка клітинки",
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 3
+                  },
+                  "column_num": {
+                    "description": "Номер стовпця клітинки",
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 3
+                  }
+                },
+                "required": ["row_num", "column_num"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": ["line_type", "cells"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["result_type"],
+      "if": {
+        "properties": { "result_type": { "const": "переможець" } }
+      },
+      "then": {
+        "required": ["winner_mark_symbol", "winning_combination"]
+      },
+      "else": {
+        "not": {
+          "anyOf": [
+            { "required": ["winner_mark_symbol"] },
+            { "required": ["winning_combination"] }
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["turn_mark_symbol", "board", "players"],,
+  "additionalProperties": false
+}
