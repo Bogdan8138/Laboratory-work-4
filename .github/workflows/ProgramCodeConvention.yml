@@ -1,0 +1,21 @@
+name: Program Code Convention
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  check-program-code:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install Biome
+        run: npm i -g @biomejs/biome@2.6.7
+      - name: Check program code files
+        run: |
+          for f in $GITHUB_WORKSPACE/ProgramCode*.js; do
+            echo "Checking $f"
+            biome lint "$f"
+            echo "OK: $f"
+          done
