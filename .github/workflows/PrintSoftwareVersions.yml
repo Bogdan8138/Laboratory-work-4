@@ -1,0 +1,24 @@
+name: Print Software Versions
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  print-software-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Nginx
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq nginx
+      - name: Print Nginx version
+        run: nginx -v
+      - name: Print Node.js version
+        run: node --version
+      - name: Print npm version
+        run: npm --version
+
+  print-dbms-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print MongoDB version
+        run: docker run --rm mongo:7 mongod --version
