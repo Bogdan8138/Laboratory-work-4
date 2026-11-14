@@ -1,0 +1,21 @@
+name: Data Schema Code Convention
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  check-data-schema:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install jsonlint
+        run: npm i -g @prantlf/jsonlint
+      - name: Check data schema files
+        run: |
+          for f in $GITHUB_WORKSPACE/DataSchema*.json; do
+            echo "Checking $f"
+            jsonlint -q "$f"
+            echo "OK: $f"
+          done
